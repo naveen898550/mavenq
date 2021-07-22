@@ -3,42 +3,42 @@ pipeline
     agent any
     stages
     {
-        stage('contineous download')
+        stage('Contineous Downloading')
         {
             steps
             {
-                script
-                {
-                    try
-                    {
-                        git 'https://github.com/naveen898550/mavenq.git'
-                    }
-                    catch(Exception e1)
-                    {
-                        mail bcc: '', body: 'jenkins is unable to download from the remote github', cc: '', from: '', replyTo: '', subject: 'download failed', to: 'naveen.gnkrock@gmail.com'
-                        exit(1)                
-                    }
-                }
+                git 'https://github.com/intelliqittrainings/maven.git'
             }
         }
-        stage('contineous build')
+        stage('Contineous Building')
         {
             steps
             {
-                script
-                {
-                    try
-                    {
-                        sh 'mvn package'
-                    }
-                    catch(Exception e2)
-                    {
-                        mail bcc: '', body: 'jenkins is unable to build an artifact from the code', cc: '', from: '', replyTo: '', subject: 'building failed', to: 'naveen.gnkrock@gmail.com'
-                        exit(1)
-                    }
-                }
+                sh 'mvn package'
+            }
+        }
+        stage('Contineous Deploying')
+        {
+            steps
+            {
+                deploy adapters: [tomcat9(credentialsId: '93813005-152a-4a64-8995-4fa600482002', path: '', url: 'http://172.31.43.195:8080')], contextPath: 'test-1', war: '**/*.war'
+            }
+        }
+        stage('Contineous Testing')
+        {
+            steps
+            {
+                git credentialsId: '93813005-152a-4a64-8995-4fa600482002', url: 'https://github.com/intelliqittrainings/FunctionalTesting.git'
+                sh 'java -jar /var/lib/jenkins/workspace/declarativepipeline/testing.jar'                        
+            }
+        }
+        stage('Contineous Delivery')
+        {
+            steps
+            {
+                input message: 'need approvals from Deliverey manager', submitter: 'kumar'
+                deploy adapters: [tomcat9(credentialsId: '93813005-152a-4a64-8995-4fa600482002', path: '', url: 'http://172.31.45.30:8080')], contextPath: 'prod-1', war: '**/*.war'
             }
         }
     }
-}            
-           
+}
